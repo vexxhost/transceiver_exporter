@@ -1,0 +1,5 @@
+.direnv
+.cr-release-packages
+dist
+transceiver_exporter
+transceiverctl

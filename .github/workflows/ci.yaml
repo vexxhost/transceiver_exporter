@@ -1,0 +1,65 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+
+      - name: Check Go formatting
+        run: |
+          files="$(nix develop --command gofmt -l .)"
+          test -z "$files"
+
+      - name: Run Go tests
+        run: nix develop --command env CGO_ENABLED=1 go test -race ./...
+
+      - name: Run Go coverage
+        run: nix develop --command go test -cover ./...
+
+      - name: Run Go lint
+        run: nix develop --command golangci-lint run --enable=revive ./...
+
+      - name: Run workflow lint
+        run: nix develop --command actionlint
+
+      - name: Check GoReleaser config
+        run: nix develop --command goreleaser check
+
+      - name: Verify generated alerts
+        run: nix develop --command ./hack/check-alerts.sh
+
+      - name: Lint Helm chart
+        run: |
+          nix develop --command helm lint charts/transceiver-exporter
+          nix develop --command helm lint charts/transceiver-exporter -f charts/transceiver-exporter/ci/podmonitor-values.yaml
+          nix develop --command helm lint charts/transceiver-exporter -f charts/transceiver-exporter/ci/prometheusrule-values.yaml
+          nix develop --command helm lint charts/transceiver-exporter -f charts/transceiver-exporter/ci/custom-values.yaml
+
+      - name: Install helm-unittest
+        run: nix develop --command helm plugin install https://github.com/helm-unittest/helm-unittest.git --version 1.0.3
+
+      - name: Run Helm unit tests
+        run: nix develop --command helm unittest charts/transceiver-exporter
+
+      - name: Render Helm chart
+        run: |
+          nix develop --command helm template transceiver-exporter charts/transceiver-exporter
+          nix develop --command helm template transceiver-exporter charts/transceiver-exporter \
+            --set podMonitor.enabled=true \
+            --set prometheusRule.enabled=true

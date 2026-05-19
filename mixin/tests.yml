@@ -1,0 +1,217 @@
+rule_files:
+  - prometheus_alerts.yaml
+
+evaluation_interval: 1m
+
+tests:
+  - interval: 1m
+    input_series:
+      - series: 'up{cluster="test",instance="node1:9459",job="transceiver-exporter"}'
+        values: '0x20'
+    alert_rule_test:
+      - eval_time: 16m
+        alertname: TransceiverExporterDown
+        exp_alerts:
+          - exp_labels:
+              alertname: TransceiverExporterDown
+              cluster: test
+              instance: node1:9459
+              job: transceiver-exporter
+              severity: warning
+            exp_annotations:
+              summary: Transceiver telemetry is unavailable.
+              description: Prometheus has not scraped transceiver_exporter on node1:9459 for 15 minutes, so optical module health for this target is unknown.
+              runbook_url: https://github.com/vexxhost/transceiver_exporter/tree/main/mixin/runbook.md#alert-name-transceiverexporterdown
+
+  - interval: 1m
+    input_series:
+      - series: 'transceiver_scrape_success{cluster="test",instance="node1:9459",interface="eth0",job="transceiver-exporter"}'
+        values: '0x20'
+    alert_rule_test:
+      - eval_time: 16m
+        alertname: TransceiverScrapeFailed
+        exp_alerts:
+          - exp_labels:
+              alertname: TransceiverScrapeFailed
+              cluster: test
+              instance: node1:9459
+              interface: eth0
+              job: transceiver-exporter
+              severity: warning
+            exp_annotations:
+              summary: Transceiver EEPROM scrape failed.
+              description: transceiver_exporter is reachable, but it has not been able to read or decode EEPROM data for node1:9459 interface eth0 for 15 minutes.
+              runbook_url: https://github.com/vexxhost/transceiver_exporter/tree/main/mixin/runbook.md#alert-name-transceiverscrapefailed
+
+  - interval: 1m
+    input_series:
+      - series: 'transceiver_alarm_status{alarm="rx_power_low",cluster="test",format="cmis",instance="node1:9459",interface="eth0",job="transceiver-exporter",lane="1",severity="warning"}'
+        values: '1x40'
+      - series: 'transceiver_lane_datapath_state{cluster="test",format="cmis",instance="node1:9459",interface="eth0",job="transceiver-exporter",lane="1",state="activated"}'
+        values: '1x40'
+      - series: 'transceiver_module_info{cluster="test",connector="LC",form_factor="sfp",format="cmis",instance="node1:9459",interface="eth0",job="transceiver-exporter",part_number="PART",serial_number="SERIAL",vendor="VENDOR"}'
+        values: '1x40'
+    alert_rule_test:
+      - eval_time: 31m
+        alertname: TransceiverWarningActive
+        exp_alerts:
+          - exp_labels:
+              alertname: TransceiverWarningActive
+              alarm: rx_power_low
+              cluster: test
+              form_factor: sfp
+              format: cmis
+              instance: node1:9459
+              interface: eth0
+              job: transceiver-exporter
+              lane: "1"
+              part_number: PART
+              serial_number: SERIAL
+              severity: warning
+              vendor: VENDOR
+            exp_annotations:
+              summary: Transceiver warning threshold is active.
+              description: node1:9459 interface eth0 lane 1 reports rx_power_low warning on VENDOR PART SERIAL. This is a ticket-level early warning unless it correlates with link errors or service impact.
+              runbook_url: https://github.com/vexxhost/transceiver_exporter/tree/main/mixin/runbook.md#alert-name-transceiverwarningactive
+
+  - interval: 1m
+    input_series:
+      - series: 'transceiver_alarm_status{alarm="tx_power_low",cluster="test",format="cmis",instance="node1:9459",interface="eth0",job="transceiver-exporter",lane="2",severity="alarm"}'
+        values: '1x20'
+      - series: 'transceiver_lane_datapath_state{cluster="test",format="cmis",instance="node1:9459",interface="eth0",job="transceiver-exporter",lane="2",state="activated"}'
+        values: '1x20'
+      - series: 'transceiver_module_info{cluster="test",connector="LC",form_factor="sfp",format="cmis",instance="node1:9459",interface="eth0",job="transceiver-exporter",part_number="PART",serial_number="SERIAL",vendor="VENDOR"}'
+        values: '1x20'
+    alert_rule_test:
+      - eval_time: 6m
+        alertname: TransceiverAlarmActive
+        exp_alerts:
+          - exp_labels:
+              alertname: TransceiverAlarmActive
+              alarm: tx_power_low
+              cluster: test
+              form_factor: sfp
+              format: cmis
+              instance: node1:9459
+              interface: eth0
+              job: transceiver-exporter
+              lane: "2"
+              part_number: PART
+              serial_number: SERIAL
+              severity: critical
+              vendor: VENDOR
+            exp_annotations:
+              summary: Transceiver alarm threshold is active.
+              description: node1:9459 interface eth0 lane 2 reports tx_power_low alarm on VENDOR PART SERIAL. The module is outside vendor operating thresholds and may lose signal.
+              runbook_url: https://github.com/vexxhost/transceiver_exporter/tree/main/mixin/runbook.md#alert-name-transceiveralarmactive
+
+  - interval: 1m
+    input_series:
+      - series: 'transceiver_alarm_status{alarm="rx_los",cluster="test",format="cmis",instance="node1:9459",interface="eth0",job="transceiver-exporter",lane="3",severity="fault"}'
+        values: '1x20'
+      - series: 'transceiver_lane_datapath_state{cluster="test",format="cmis",instance="node1:9459",interface="eth0",job="transceiver-exporter",lane="3",state="activated"}'
+        values: '1x20'
+      - series: 'transceiver_module_info{cluster="test",connector="LC",form_factor="sfp",format="cmis",instance="node1:9459",interface="eth0",job="transceiver-exporter",part_number="PART",serial_number="SERIAL",vendor="VENDOR"}'
+        values: '1x20'
+    alert_rule_test:
+      - eval_time: 6m
+        alertname: TransceiverFaultActive
+        exp_alerts:
+          - exp_labels:
+              alertname: TransceiverFaultActive
+              alarm: rx_los
+              cluster: test
+              form_factor: sfp
+              format: cmis
+              instance: node1:9459
+              interface: eth0
+              job: transceiver-exporter
+              lane: "3"
+              part_number: PART
+              serial_number: SERIAL
+              severity: critical
+              vendor: VENDOR
+            exp_annotations:
+              summary: Transceiver fault is active.
+              description: node1:9459 interface eth0 lane 3 reports rx_los fault on VENDOR PART SERIAL. This is a module-reported loss-of-signal, loss-of-lock, or transmitter fault symptom.
+              runbook_url: https://github.com/vexxhost/transceiver_exporter/tree/main/mixin/runbook.md#alert-name-transceiverfaultactive
+
+  - interval: 1m
+    input_series:
+      - series: 'transceiver_alarm_status{alarm="rx_power_low",cluster="test",format="cmis",instance="node1:9459",interface="eth0",job="transceiver-exporter",lane="4",severity="warning"}'
+        values: '1x40'
+      - series: 'transceiver_alarm_status{alarm="tx_power_low",cluster="test",format="cmis",instance="node1:9459",interface="eth0",job="transceiver-exporter",lane="4",severity="alarm"}'
+        values: '1x40'
+      - series: 'transceiver_alarm_status{alarm="rx_los",cluster="test",format="cmis",instance="node1:9459",interface="eth0",job="transceiver-exporter",lane="4",severity="fault"}'
+        values: '1x40'
+      - series: 'transceiver_lane_datapath_state{cluster="test",format="cmis",instance="node1:9459",interface="eth0",job="transceiver-exporter",lane="4",state="deactivated"}'
+        values: '1x40'
+      - series: 'transceiver_module_info{cluster="test",connector="LC",form_factor="sfp",format="cmis",instance="node1:9459",interface="eth0",job="transceiver-exporter",part_number="PART",serial_number="SERIAL",vendor="VENDOR"}'
+        values: '1x40'
+    alert_rule_test:
+      - eval_time: 31m
+        alertname: TransceiverWarningActive
+        exp_alerts: []
+      - eval_time: 6m
+        alertname: TransceiverAlarmActive
+        exp_alerts: []
+      - eval_time: 6m
+        alertname: TransceiverFaultActive
+        exp_alerts: []
+
+  - interval: 1m
+    input_series:
+      - series: 'transceiver_module_status{cluster="test",fault="module_firmware_fault",format="cmis",instance="node1:9459",interface="eth0",job="transceiver-exporter",state="fault"}'
+        values: '1x20'
+      - series: 'transceiver_module_info{cluster="test",connector="LC",form_factor="sfp",format="cmis",instance="node1:9459",interface="eth0",job="transceiver-exporter",part_number="PART",serial_number="SERIAL",vendor="VENDOR"}'
+        values: '1x20'
+    alert_rule_test:
+      - eval_time: 6m
+        alertname: TransceiverModuleFault
+        exp_alerts:
+          - exp_labels:
+              alertname: TransceiverModuleFault
+              cluster: test
+              fault: module_firmware_fault
+              form_factor: sfp
+              format: cmis
+              instance: node1:9459
+              interface: eth0
+              job: transceiver-exporter
+              part_number: PART
+              serial_number: SERIAL
+              severity: critical
+              state: fault
+              vendor: VENDOR
+            exp_annotations:
+              summary: Transceiver module is in fault state.
+              description: node1:9459 interface eth0 reports module state fault module_firmware_fault on VENDOR PART SERIAL.
+              runbook_url: https://github.com/vexxhost/transceiver_exporter/tree/main/mixin/runbook.md#alert-name-transceivermodulefault
+
+  - interval: 1m
+    input_series:
+      - series: 'transceiver_module_low_power_status{cluster="test",format="cmis",instance="node1:9459",interface="eth0",job="transceiver-exporter",source="software"}'
+        values: '1x40'
+      - series: 'transceiver_module_info{cluster="test",connector="LC",form_factor="sfp",format="cmis",instance="node1:9459",interface="eth0",job="transceiver-exporter",part_number="PART",serial_number="SERIAL",vendor="VENDOR"}'
+        values: '1x40'
+    alert_rule_test:
+      - eval_time: 31m
+        alertname: TransceiverModuleLowPower
+        exp_alerts:
+          - exp_labels:
+              alertname: TransceiverModuleLowPower
+              cluster: test
+              form_factor: sfp
+              format: cmis
+              instance: node1:9459
+              interface: eth0
+              job: transceiver-exporter
+              part_number: PART
+              serial_number: SERIAL
+              severity: warning
+              source: software
+              vendor: VENDOR
+            exp_annotations:
+              summary: Transceiver module is requesting low-power mode.
+              description: node1:9459 interface eth0 has low-power request source software active on VENDOR PART SERIAL. Investigate if this interface is expected to carry production traffic.
+              runbook_url: https://github.com/vexxhost/transceiver_exporter/tree/main/mixin/runbook.md#alert-name-transceivermodulelowpower

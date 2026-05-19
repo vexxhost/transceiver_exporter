@@ -1,0 +1,11 @@
+transceiver-exporter has been installed as a DaemonSet.
+
+To scrape it with Prometheus Operator, enable the PodMonitor:
+
+  helm upgrade --install {{ .Release.Name }} {{ .Chart.Name }} \
+    --set podMonitor.enabled=true
+
+To install the bundled PrometheusRule alerts:
+
+  helm upgrade --install {{ .Release.Name }} {{ .Chart.Name }} \
+    --set prometheusRule.enabled=true

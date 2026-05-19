@@ -1,0 +1,115 @@
+groups:
+- name: "transceiver-exporter"
+  rules:
+  - alert: "TransceiverExporterDown"
+    annotations:
+      description: "Prometheus has not scraped transceiver_exporter on {{ $labels.instance }} for 15 minutes, so optical module health for this target is unknown."
+      runbook_url: "https://github.com/vexxhost/transceiver_exporter/tree/main/mixin/runbook.md#alert-name-transceiverexporterdown"
+      summary: "Transceiver telemetry is unavailable."
+    expr: "up{job=\"transceiver-exporter\"} == 0"
+    for: "15m"
+    labels:
+      severity: "warning"
+  - alert: "TransceiverScrapeFailed"
+    annotations:
+      description: "transceiver_exporter is reachable, but it has not been able to read or decode EEPROM data for {{ $labels.instance }} interface {{ $labels.interface }} for 15 minutes."
+      runbook_url: "https://github.com/vexxhost/transceiver_exporter/tree/main/mixin/runbook.md#alert-name-transceiverscrapefailed"
+      summary: "Transceiver EEPROM scrape failed."
+    expr: "transceiver_scrape_success{job=\"transceiver-exporter\"} == 0"
+    for: "15m"
+    labels:
+      severity: "warning"
+  - alert: "TransceiverWarningActive"
+    annotations:
+      description: "{{ $labels.instance }} interface {{ $labels.interface }} lane {{ $labels.lane }} reports {{ $labels.alarm }} warning on {{ $labels.vendor }} {{ $labels.part_number }} {{ $labels.serial_number }}. This is a ticket-level early warning unless it correlates with link errors or service impact."
+      runbook_url: "https://github.com/vexxhost/transceiver_exporter/tree/main/mixin/runbook.md#alert-name-transceiverwarningactive"
+      summary: "Transceiver warning threshold is active."
+    expr: |
+      (
+        (
+        transceiver_alarm_status{job="transceiver-exporter",severity="warning",lane=""} == 1
+      )
+      or
+      (
+        (transceiver_alarm_status{job="transceiver-exporter",severity="warning",lane!=""} == 1)
+        and on(cluster, job, instance, interface, format, lane)
+          (transceiver_lane_datapath_state{job="transceiver-exporter",state="activated"} == 1)
+      )
+      )
+      * on(cluster, job, instance, interface, format) group_left(vendor, part_number, serial_number, form_factor)
+        transceiver_module_info{job="transceiver-exporter"}
+    for: "30m"
+    labels:
+      severity: "warning"
+  - alert: "TransceiverAlarmActive"
+    annotations:
+      description: "{{ $labels.instance }} interface {{ $labels.interface }} lane {{ $labels.lane }} reports {{ $labels.alarm }} alarm on {{ $labels.vendor }} {{ $labels.part_number }} {{ $labels.serial_number }}. The module is outside vendor operating thresholds and may lose signal."
+      runbook_url: "https://github.com/vexxhost/transceiver_exporter/tree/main/mixin/runbook.md#alert-name-transceiveralarmactive"
+      summary: "Transceiver alarm threshold is active."
+    expr: |
+      (
+        (
+        transceiver_alarm_status{job="transceiver-exporter",severity="alarm",lane=""} == 1
+      )
+      or
+      (
+        (transceiver_alarm_status{job="transceiver-exporter",severity="alarm",lane!=""} == 1)
+        and on(cluster, job, instance, interface, format, lane)
+          (transceiver_lane_datapath_state{job="transceiver-exporter",state="activated"} == 1)
+      )
+      )
+      * on(cluster, job, instance, interface, format) group_left(vendor, part_number, serial_number, form_factor)
+        transceiver_module_info{job="transceiver-exporter"}
+    for: "5m"
+    labels:
+      severity: "critical"
+  - alert: "TransceiverFaultActive"
+    annotations:
+      description: "{{ $labels.instance }} interface {{ $labels.interface }} lane {{ $labels.lane }} reports {{ $labels.alarm }} fault on {{ $labels.vendor }} {{ $labels.part_number }} {{ $labels.serial_number }}. This is a module-reported loss-of-signal, loss-of-lock, or transmitter fault symptom."
+      runbook_url: "https://github.com/vexxhost/transceiver_exporter/tree/main/mixin/runbook.md#alert-name-transceiverfaultactive"
+      summary: "Transceiver fault is active."
+    expr: |
+      (
+        (
+        transceiver_alarm_status{job="transceiver-exporter",severity="fault",lane=""} == 1
+      )
+      or
+      (
+        (transceiver_alarm_status{job="transceiver-exporter",severity="fault",lane!=""} == 1)
+        and on(cluster, job, instance, interface, format, lane)
+          (transceiver_lane_datapath_state{job="transceiver-exporter",state="activated"} == 1)
+      )
+      )
+      * on(cluster, job, instance, interface, format) group_left(vendor, part_number, serial_number, form_factor)
+        transceiver_module_info{job="transceiver-exporter"}
+    for: "5m"
+    labels:
+      severity: "critical"
+  - alert: "TransceiverModuleFault"
+    annotations:
+      description: "{{ $labels.instance }} interface {{ $labels.interface }} reports module state fault {{ $labels.fault }} on {{ $labels.vendor }} {{ $labels.part_number }} {{ $labels.serial_number }}."
+      runbook_url: "https://github.com/vexxhost/transceiver_exporter/tree/main/mixin/runbook.md#alert-name-transceivermodulefault"
+      summary: "Transceiver module is in fault state."
+    expr: |
+      (
+        transceiver_module_status{job="transceiver-exporter",state="fault"} == 1
+      )
+      * on(cluster, job, instance, interface, format) group_left(vendor, part_number, serial_number, form_factor)
+        transceiver_module_info{job="transceiver-exporter"}
+    for: "5m"
+    labels:
+      severity: "critical"
+  - alert: "TransceiverModuleLowPower"
+    annotations:
+      description: "{{ $labels.instance }} interface {{ $labels.interface }} has low-power request source {{ $labels.source }} active on {{ $labels.vendor }} {{ $labels.part_number }} {{ $labels.serial_number }}. Investigate if this interface is expected to carry production traffic."
+      runbook_url: "https://github.com/vexxhost/transceiver_exporter/tree/main/mixin/runbook.md#alert-name-transceivermodulelowpower"
+      summary: "Transceiver module is requesting low-power mode."
+    expr: |
+      (
+        transceiver_module_low_power_status{job="transceiver-exporter"} == 1
+      )
+      * on(cluster, job, instance, interface, format) group_left(vendor, part_number, serial_number, form_factor)
+        transceiver_module_info{job="transceiver-exporter"}
+    for: "30m"
+    labels:
+      severity: "warning"

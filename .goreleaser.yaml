@@ -1,0 +1,99 @@
+version: 2
+
+project_name: transceiver_exporter
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: transceiver_exporter
+    main: ./cmd/transceiver_exporter
+    binary: transceiver_exporter
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X github.com/prometheus/common/version.Version={{ .Version }}
+      - -X github.com/prometheus/common/version.Revision={{ .FullCommit }}
+      - -X github.com/prometheus/common/version.Branch={{ .Branch }}
+      - -X github.com/prometheus/common/version.BuildDate={{ .Date }}
+
+  - id: transceiverctl
+    main: ./cmd/transceiverctl
+    binary: transceiverctl
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X github.com/prometheus/common/version.Version={{ .Version }}
+      - -X github.com/prometheus/common/version.Revision={{ .FullCommit }}
+      - -X github.com/prometheus/common/version.Branch={{ .Branch }}
+      - -X github.com/prometheus/common/version.BuildDate={{ .Date }}
+
+archives:
+  - id: linux_binaries
+    ids:
+      - transceiver_exporter
+      - transceiverctl
+    name_template: >-
+      {{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}
+    files:
+      - README.md
+
+checksum:
+  name_template: checksums.txt
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-snapshot"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+
+dockers_v2:
+  - ids:
+      - transceiver_exporter
+    images:
+      - ghcr.io/vexxhost/transceiver-exporter
+    tags:
+      - "{{ .Tag }}"
+      - "{{ .Major }}.{{ .Minor }}"
+      - "{{ .Major }}"
+      - latest
+    platforms:
+      - linux/amd64
+      - linux/arm64
+    labels:
+      org.opencontainers.image.title: transceiver_exporter
+      org.opencontainers.image.description: Prometheus exporter for SFP, QSFP, and CMIS transceiver telemetry.
+      org.opencontainers.image.source: "{{ .GitURL }}"
+      org.opencontainers.image.revision: "{{ .FullCommit }}"
+      org.opencontainers.image.version: "{{ .Version }}"
+    annotations:
+      org.opencontainers.image.title: transceiver_exporter
+      org.opencontainers.image.description: Prometheus exporter for SFP, QSFP, and CMIS transceiver telemetry.
+      org.opencontainers.image.source: "{{ .GitURL }}"
+      org.opencontainers.image.revision: "{{ .FullCommit }}"
+      org.opencontainers.image.version: "{{ .Version }}"
+    sbom: true
+
+release:
+  github:
+    owner: vexxhost
+    name: transceiver_exporter
+  extra_files:
+    - glob: ./Dockerfile

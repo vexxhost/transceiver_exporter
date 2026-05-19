@@ -1,0 +1,11 @@
+interfaces:
+  - ens3f0np0
+  - ens3f1np1
+extraArgs:
+  - --log.level=debug
+podLabels:
+  rack: rack-a
+resources:
+  requests:
+    cpu: 10m
+    memory: 32Mi

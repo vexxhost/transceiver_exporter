@@ -1,0 +1,9 @@
+.git
+.github
+.direnv
+result
+charts
+mixin
+tmp
+*.log
+*.out

@@ -1,0 +1,35 @@
+	Identifier                                : 0x03 (SFP)
+	Extended identifier                       : 0x04 (GBIC/SFP defined by 2-wire interface ID)
+	Connector                                 : 0x21 (Copper pigtail)
+	Transceiver codes                         : 0x01 0x00 0x00 0x04 0x41 0x84 0x80 0xd5 0x00
+	Transceiver type                          : Infiniband: 1X Copper Passive
+	Transceiver type                          : Ethernet: 1000BASE-CX
+	Transceiver type                          : FC: short distance (S)
+	Transceiver type                          : FC: Electrical inter-enclosure (EL)
+	Transceiver type                          : FC: Electrical intra-enclosure (EL)
+	Transceiver type                          : Passive Cable
+	Transceiver type                          : FC: Twin Axial Pair (TW)
+	Transceiver type                          : FC: 1200 MBytes/sec
+	Transceiver type                          : FC: 800 MBytes/sec
+	Transceiver type                          : FC: 400 MBytes/sec
+	Transceiver type                          : FC: 200 MBytes/sec
+	Transceiver type                          : FC: 100 MBytes/sec
+	Encoding                                  : 0x00 (unspecified)
+	BR, Nominal                               : 10300MBd
+	Rate identifier                           : 0x00 (unspecified)
+	Length (SMF,km)                           : 0km
+	Length (SMF)                              : 0m
+	Length (50um)                             : 0m
+	Length (62.5um)                           : 0m
+	Length (Copper)                           : 1m
+	Length (OM3)                              : 0m
+	Passive Cu cmplnce.                       : 0x00 (unspecified) [SFF-8472 rev10.4 only]
+	Vendor name                               : 10Gtek
+	Vendor OUI                                : 00:00:00
+	Vendor PN                                 : CAB-10GSFP-P1M
+	Vendor rev                                : V01
+	Option values                             : 0x00 0x00
+	BR margin, max                            : 0%
+	BR margin, min                            : 0%
+	Vendor SN                                 : WTS11HC0114
+	Date code                                 : 171201

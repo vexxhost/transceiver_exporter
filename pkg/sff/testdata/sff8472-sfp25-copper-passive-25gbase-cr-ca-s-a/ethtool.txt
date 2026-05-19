@@ -1,0 +1,33 @@
+	Identifier                                : 0x03 (SFP)
+	Extended identifier                       : 0x04 (GBIC/SFP defined by 2-wire interface ID)
+	Connector                                 : 0x23 (No separable connector)
+	Transceiver codes                         : 0x01 0x00 0x00 0x00 0x00 0x04 0x80 0xfd 0x0c
+	Transceiver type                          : Infiniband: 1X Copper Passive
+	Transceiver type                          : Passive Cable
+	Transceiver type                          : FC: Twin Axial Pair (TW)
+	Transceiver type                          : FC: 1200 MBytes/sec
+	Transceiver type                          : FC: 800 MBytes/sec
+	Transceiver type                          : FC: 400 MBytes/sec
+	Transceiver type                          : FC: 200 MBytes/sec
+	Transceiver type                          : FC: 100 MBytes/sec
+	Transceiver type                          : Extended: 25G Base-CR CA-S
+	Encoding                                  : 0x00 (unspecified)
+	BR, Nominal                               : 25750MBd
+	Rate identifier                           : 0x00 (unspecified)
+	Length (SMF,km)                           : 0km
+	Length (SMF)                              : 0m
+	Length (50um)                             : 0m
+	Length (62.5um)                           : 0m
+	Length (Copper)                           : 2m
+	Length (OM3)                              : 0m
+	Passive Cu cmplnce.                       : 0x01 (SFF-8431 appendix E) [SFF-8472 rev10.4 only]
+	Vendor name                               : TE Connectivity
+	Vendor OUI                                : 00:40:20
+	Vendor PN                                 : 2821224-1
+	Vendor rev                                : B
+	Option values                             : 0x00 0x00
+	BR margin, max                            : 0%
+	BR margin, min                            : 0%
+	Vendor SN                                 : ARP21L10405
+	Date code                                 : 21012200
+	Optical diagnostics support               : No

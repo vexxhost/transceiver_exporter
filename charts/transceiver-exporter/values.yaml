@@ -1,0 +1,153 @@
+# Default values for transceiver-exporter.
+
+image:
+  registry: ghcr.io
+  repository: vexxhost/transceiver-exporter
+  # Overrides the image tag whose default is {{ printf "v%s" .Chart.AppVersion }}.
+  tag: ""
+  pullPolicy: IfNotPresent
+  digest: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+namespaceOverride: ""
+commonLabels: {}
+
+global:
+  imageRegistry: ""
+  imagePullSecrets: []
+
+revisionHistoryLimit: 10
+
+updateStrategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable: 1
+
+portName: metrics
+containerPort: 9459
+metricsPath: /metrics
+
+# Restrict scraping to specific interfaces. Each item renders as a repeated
+# --interface flag. Leave empty to auto-discover physical non-loopback devices.
+interfaces: []
+
+extraArgs: []
+extraEnv: []
+extraEnvFrom: []
+
+webConfig:
+  # Mount an existing exporter-toolkit web config Secret and pass
+  # --web.config.file to the exporter.
+  existingSecret: ""
+  key: web-config.yaml
+  mountPath: /etc/transceiver-exporter/web-config
+
+hostNetwork: true
+hostPID: false
+hostIPC: false
+dnsPolicy: ClusterFirstWithHostNet
+
+hostPort:
+  enabled: false
+  port: 9459
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+  automountServiceAccountToken: false
+  imagePullSecrets: []
+
+podAnnotations: {}
+podLabels: {}
+daemonsetAnnotations: {}
+priorityClassName: ""
+
+podSecurityContext: {}
+
+# ethtool EEPROM reads generally require host networking plus elevated network
+# privileges. Keep this overrideable for environments that can run with a more
+# constrained profile.
+containerSecurityContext:
+  privileged: true
+  readOnlyRootFilesystem: true
+
+resources: {}
+
+livenessProbe:
+  enabled: true
+  path: /
+  initialDelaySeconds: 10
+  periodSeconds: 30
+  timeoutSeconds: 5
+  failureThreshold: 3
+  successThreshold: 1
+
+readinessProbe:
+  enabled: true
+  path: /
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+  successThreshold: 1
+
+nodeSelector:
+  kubernetes.io/os: linux
+
+tolerations:
+  - effect: NoSchedule
+    operator: Exists
+
+affinity: {}
+topologySpreadConstraints: []
+terminationGracePeriodSeconds: 30
+
+extraInitContainers: []
+extraContainers: []
+extraVolumes: []
+extraVolumeMounts: []
+
+podMonitor:
+  enabled: false
+  apiVersion: monitoring.coreos.com/v1
+  namespace: ""
+  additionalLabels: {}
+  annotations: {}
+  selectorOverride: {}
+  jobLabel: app.kubernetes.io/name
+  podTargetLabels: []
+  attachMetadata:
+    node: true
+  scheme: http
+  path: /metrics
+  interval: ""
+  scrapeTimeout: 10s
+  honorLabels: true
+  honorTimestamps: true
+  enableHttp2: false
+  filterRunning: true
+  followRedirects: false
+  params: {}
+  basicAuth: {}
+  bearerTokenSecret: {}
+  tlsConfig: {}
+  authorization: {}
+  oauth2: {}
+  proxyUrl: ""
+  relabelings: []
+  metricRelabelings: []
+  sampleLimit: 0
+  targetLimit: 0
+  labelLimit: 0
+  labelNameLengthLimit: 0
+  labelValueLengthLimit: 0
+
+prometheusRule:
+  enabled: false
+  apiVersion: monitoring.coreos.com/v1
+  namespace: ""
+  additionalLabels: {}
+  annotations: {}

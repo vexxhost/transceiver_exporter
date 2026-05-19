@@ -1,0 +1,19 @@
+{{- if .Values.prometheusRule.enabled }}
+{{- $rules := .Files.Get "files/prometheus-alerts.yaml" | fromYaml }}
+apiVersion: {{ .Values.prometheusRule.apiVersion | default "monitoring.coreos.com/v1" }}
+kind: PrometheusRule
+metadata:
+  name: {{ include "transceiver-exporter.fullname" . }}
+  namespace: {{ include "transceiver-exporter.prometheusRuleNamespace" . }}
+  labels:
+    {{- include "transceiver-exporter.labels" . | nindent 4 }}
+    {{- with .Values.prometheusRule.additionalLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.prometheusRule.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- toYaml $rules | nindent 2 }}
+{{- end }}

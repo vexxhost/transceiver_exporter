@@ -1,0 +1,30 @@
+suite: daemonset
+templates:
+  - templates/daemonset.yaml
+tests:
+  - it: renders a host-networked daemonset by default
+    asserts:
+      - isKind:
+          of: DaemonSet
+      - equal:
+          path: spec.template.spec.hostNetwork
+          value: true
+      - equal:
+          path: spec.template.spec.containers[0].ports[0].containerPort
+          value: 9459
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --web.telemetry-path=/metrics
+
+  - it: renders repeated interface flags
+    set:
+      interfaces:
+        - ens3f0np0
+        - ens3f1np1
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --interface=ens3f0np0
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --interface=ens3f1np1

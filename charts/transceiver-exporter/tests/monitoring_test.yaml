@@ -1,0 +1,32 @@
+suite: monitoring
+templates:
+  - templates/podmonitor.yaml
+  - templates/prometheusrule.yaml
+tests:
+  - it: renders a PodMonitor when enabled
+    set:
+      podMonitor.enabled: true
+    asserts:
+      - template: templates/podmonitor.yaml
+        isKind:
+          of: PodMonitor
+      - template: templates/podmonitor.yaml
+        equal:
+          path: spec.podMetricsEndpoints[0].port
+          value: metrics
+
+  - it: renders bundled alerts into a PrometheusRule when enabled
+    set:
+      prometheusRule.enabled: true
+    asserts:
+      - template: templates/prometheusrule.yaml
+        isKind:
+          of: PrometheusRule
+      - template: templates/prometheusrule.yaml
+        equal:
+          path: spec.groups[0].name
+          value: transceiver-exporter
+      - template: templates/prometheusrule.yaml
+        lengthEqual:
+          path: spec.groups[0].rules
+          count: 7

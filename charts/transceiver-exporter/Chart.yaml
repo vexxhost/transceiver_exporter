@@ -1,0 +1,18 @@
+apiVersion: v2
+name: transceiver-exporter
+description: Prometheus exporter for SFP, QSFP, and CMIS transceiver telemetry.
+type: application
+version: 0.1.0
+appVersion: 0.1.0
+home: https://github.com/vexxhost/transceiver_exporter
+sources:
+  - https://github.com/vexxhost/transceiver_exporter
+keywords:
+  - prometheus
+  - exporter
+  - transceiver
+  - sfp
+  - qsfp
+maintainers:
+  - name: VEXXHOST
+    url: https://vexxhost.com
