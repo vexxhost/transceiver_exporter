@@ -36,7 +36,7 @@ jobs:
         run: helm package charts/transceiver-exporter --destination .cr-release-packages
 
       - name: Upload packaged chart
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: transceiver-exporter-chart
           path: .cr-release-packages/*.tgz
