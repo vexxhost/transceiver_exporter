@@ -114,6 +114,8 @@ podMonitor:
   enabled: false
   apiVersion: monitoring.coreos.com/v1
   namespace: ""
+  # kube-prometheus-stack commonly requires a release label here so its
+  # Prometheus podMonitorSelector can discover this PodMonitor.
   additionalLabels: {}
   annotations: {}
   selectorOverride: {}

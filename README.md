@@ -82,8 +82,12 @@ ServiceMonitor.
 
 ```sh
 helm install transceiver-exporter charts/transceiver-exporter \
+  -n monitoring \
   --set podMonitor.enabled=true \
-  --set prometheusRule.enabled=true
+  --set podMonitor.additionalLabels.release=kube-prometheus-stack \
+  --set prometheusRule.enabled=true \
+  --set prometheusRule.namespace=monitoring \
+  --set prometheusRule.additionalLabels.release=kube-prometheus-stack
 ```
 
 ## Development
