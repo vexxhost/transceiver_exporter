@@ -15,6 +15,7 @@ type ioctlClient interface {
 }
 
 type netlinkModuleReader interface {
+	ModuleIdentifier(interfaceName string) (uint8, error)
 	ModuleEEPROM(interfaceName string) ([]byte, error)
 	Close() error
 }
@@ -32,9 +33,12 @@ type Reader struct {
 
 // New opens an ethtool-backed Reader.
 //
-// The returned reader always attempts ioctl access first. When netlink support
-// is available, CMIS modules are reread through netlink so upper pages and banked
-// lane diagnostics can be collected.
+// When netlink support is available, the reader probes the module identifier
+// through netlink first so CMIS modules can avoid drivers whose legacy ioctl
+// EEPROM path does not recognize newer module IDs. SFF-8472 and SFF-8636
+// modules continue to use the legacy ioctl path by default. CMIS modules are
+// read through netlink so upper pages and banked lane diagnostics can be
+// collected.
 func New() (*Reader, error) {
 	ioctl, err := safchain.NewEthtool()
 	if err != nil {
@@ -85,10 +89,27 @@ func (r *Reader) ModuleEEPROM(interfaceName string) ([]byte, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
+	var (
+		netlinkData  []byte
+		netlinkErr   error
+		triedNetlink bool
+	)
+
+	if r.netlink != nil {
+		moduleID, err := r.netlink.ModuleIdentifier(interfaceName)
+		if err == nil && isCMISIdentifier(moduleID) {
+			triedNetlink = true
+			netlinkData, netlinkErr = r.netlink.ModuleEEPROM(interfaceName)
+			if netlinkErr == nil {
+				return netlinkData, nil
+			}
+		}
+	}
+
 	data, err := r.ioctl.ModuleEeprom(interfaceName)
 	if err == nil {
-		if r.netlink != nil && isCMIS(data) {
-			netlinkData, netlinkErr := r.netlink.ModuleEEPROM(interfaceName)
+		if r.netlink != nil && !triedNetlink && isCMIS(data) {
+			netlinkData, netlinkErr = r.netlink.ModuleEEPROM(interfaceName)
 			if netlinkErr == nil {
 				return netlinkData, nil
 			}
@@ -99,14 +120,17 @@ func (r *Reader) ModuleEEPROM(interfaceName string) ([]byte, error) {
 		return nil, err
 	}
 
-	netlinkData, netlinkErr := r.netlink.ModuleEEPROM(interfaceName)
-	if netlinkErr != nil {
-		return nil, errors.Join(
-			fmt.Errorf("ioctl module eeprom: %w", err),
-			fmt.Errorf("netlink module eeprom: %w", netlinkErr),
-		)
+	if !triedNetlink {
+		netlinkData, netlinkErr = r.netlink.ModuleEEPROM(interfaceName)
+		if netlinkErr == nil {
+			return netlinkData, nil
+		}
 	}
-	return netlinkData, nil
+
+	return nil, errors.Join(
+		fmt.Errorf("ioctl module eeprom: %w", err),
+		fmt.Errorf("netlink module eeprom: %w", netlinkErr),
+	)
 }
 
 func isCMIS(data []byte) bool {
@@ -114,7 +138,11 @@ func isCMIS(data []byte) bool {
 		return false
 	}
 
-	switch data[0] {
+	return isCMISIdentifier(data[0])
+}
+
+func isCMISIdentifier(moduleID uint8) bool {
+	switch moduleID {
 	case 0x18, 0x19, 0x1e, 0x1f, 0x20:
 		return true
 	default:
