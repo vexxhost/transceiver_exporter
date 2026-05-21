@@ -47,19 +47,22 @@ replaceable module identity.
 
 ## Mixin
 
-The `mixin/` directory contains a Prometheus mixin with alert rules and
-`promtool` unit tests. Lane-scoped alarm alerts are gated by
+The `mixin/` directory contains a Prometheus mixin with alert rules, a Grafana
+dashboard, and `promtool` unit tests. Lane-scoped alarm alerts are gated by
 `transceiver_lane_datapath_state{state="activated"}` so intentionally inactive
 lanes do not page on optical power or loss-of-signal flags.
 
 ```sh
 jsonnet -S mixin/alerts.jsonnet > mixin/prometheus_alerts.yaml
+./hack/render-dashboards.sh
 (cd mixin && promtool test rules tests.yml)
 ```
 
 The generated alert rules are also checked into
 `charts/transceiver-exporter/files/prometheus-alerts.yaml` for the Helm chart.
-Run `./hack/render-alerts.sh` after editing the mixin.
+The generated dashboard is checked into `grafana/`. Run
+`./hack/render-alerts.sh` and `./hack/render-dashboards.sh` after editing the
+mixin.
 
 ## Container Image
 
