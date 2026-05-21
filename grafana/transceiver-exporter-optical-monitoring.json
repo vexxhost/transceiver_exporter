@@ -1258,7 +1258,7 @@
             "inspect": false
           },
           "decimals": 0,
-          "unit": "m"
+          "unit": "lengthm"
         },
         "overrides": []
       },
@@ -1664,6 +1664,7 @@
   "templating": {
     "list": [
       {
+        "allValue": ".*",
         "current": {
           "selected": false,
           "text": "",
@@ -1675,12 +1676,16 @@
         },
         "definition": "label_values(transceiver_scrape_success{job=\"transceiver-exporter\"}, instance)",
         "hide": 0,
-        "includeAll": false,
+        "includeAll": true,
         "label": "Instance",
         "multi": false,
         "name": "instance",
         "options": [],
-        "query": "label_values(transceiver_scrape_success{job=\"transceiver-exporter\"}, instance)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(transceiver_scrape_success{job=\"transceiver-exporter\"}, instance)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
@@ -1688,6 +1693,7 @@
         "type": "query"
       },
       {
+        "allValue": ".*",
         "current": {
           "selected": false,
           "text": "",
@@ -1699,12 +1705,16 @@
         },
         "definition": "label_values(transceiver_scrape_success{job=\"transceiver-exporter\",instance=~\"$instance\"}, interface)",
         "hide": 0,
-        "includeAll": false,
+        "includeAll": true,
         "label": "Interface",
         "multi": false,
         "name": "interface",
         "options": [],
-        "query": "label_values(transceiver_scrape_success{job=\"transceiver-exporter\",instance=~\"$instance\"}, interface)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(transceiver_scrape_success{job=\"transceiver-exporter\",instance=~\"$instance\"}, interface)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
@@ -1720,6 +1730,6 @@
   "timezone": "",
   "title": "Transceiver Exporter / Optical Monitoring",
   "uid": "transceiver-exporter-optics",
-  "version": 1,
+  "version": 3,
   "weekStart": ""
 }

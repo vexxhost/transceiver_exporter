@@ -64,6 +64,14 @@ The generated dashboard is checked into `grafana/`. Run
 `./hack/render-alerts.sh` and `./hack/render-dashboards.sh` after editing the
 mixin.
 
+Example Grafana panels from the generated dashboard:
+
+![Grafana dashboard overview with module health, environmental telemetry, and optical power panels](docs/images/grafana/dashboard-overview.png)
+
+![Grafana dashboard lane telemetry with TX bias, lane datapath state, and per-lane RX/TX power gauges](docs/images/grafana/dashboard-lane-telemetry.png)
+
+![Grafana dashboard module details with supported link lengths, wavelength, module power, and EEPROM flag panels](docs/images/grafana/dashboard-module-details.png)
+
 ## Container Image
 
 The repository includes a GoReleaser-compatible `Dockerfile` for the exporter

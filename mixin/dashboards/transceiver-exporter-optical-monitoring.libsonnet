@@ -269,7 +269,13 @@
       },
       statOptions(colorMode='background', graphMode='none'),
     ),
+  local variableQuery(query) = {
+    qryType: 1,
+    query: query,
+    refId: 'PrometheusVariableQueryEditor-VariableQuery',
+  },
   local variable(name, label, query) = {
+    allValue: '.*',
     current: {
       selected: false,
       text: '',
@@ -278,12 +284,12 @@
     datasource: datasource,
     definition: query,
     hide: 0,
-    includeAll: false,
+    includeAll: true,
     label: label,
     multi: false,
     name: name,
     options: [],
-    query: query,
+    query: variableQuery(query),
     refresh: 1,
     regex: '',
     skipUrlSync: false,
@@ -585,7 +591,7 @@
         },
         defaultsExtra={
           decimals: 0,
-          unit: 'm',
+          unit: 'lengthm',
         },
       ),
       valueStatPanel(
@@ -688,7 +694,7 @@
     timezone: '',
     title: 'Transceiver Exporter / Optical Monitoring',
     uid: 'transceiver-exporter-optics',
-    version: 1,
+    version: 3,
     weekStart: '',
   },
 
