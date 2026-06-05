@@ -1,0 +1,1736 @@
+{
+  "__inputs": [
+    {
+      "description": "",
+      "label": "Prometheus",
+      "name": "DS_PROMETHEUS",
+      "pluginId": "prometheus",
+      "pluginName": "Prometheus",
+      "type": "datasource"
+    }
+  ],
+  "__requires": [
+    {
+      "id": "grafana",
+      "name": "Grafana",
+      "type": "grafana",
+      "version": "11.0.0"
+    },
+    {
+      "id": "stat",
+      "name": "Stat",
+      "type": "panel",
+      "version": ""
+    },
+    {
+      "id": "timeseries",
+      "name": "Time series",
+      "type": "panel",
+      "version": ""
+    },
+    {
+      "id": "table",
+      "name": "Table",
+      "type": "panel",
+      "version": ""
+    },
+    {
+      "id": "bargauge",
+      "name": "Bar gauge",
+      "type": "panel",
+      "version": ""
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "Count of optical module inventory records in the selected scope.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "red",
+                  "text": "No module"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "count(transceiver_module_info{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\"}) or vector(0)",
+          "instant": true,
+          "legendFormat": "modules",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Module Inventory",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "Minimum scrape success across the selected instance and interface.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "red",
+                  "text": "Failed"
+                },
+                "1": {
+                  "color": "green",
+                  "text": "Healthy"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "min(transceiver_scrape_success{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\"}) or vector(0)",
+          "instant": true,
+          "legendFormat": "scrape",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Scrape Health",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "Module-level flags and lane-scoped flags on activated lanes. Deactivated lane flags are listed below as deactivated.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 3
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "id": 3,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "sum(((transceiver_alarm_status{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\",lane=\"\"} == 1) or ((transceiver_alarm_status{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\",lane!=\"\"} == 1) and on(cluster, job, instance, interface, format, lane) (transceiver_lane_datapath_state{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\",state=\"activated\"} == 1)))) or vector(0)",
+          "instant": true,
+          "legendFormat": "flags",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Actionable EEPROM Flags",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "Current firing Prometheus alerts whose names start with Transceiver.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "id": 4,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "count(ALERTS{job=\"transceiver-exporter\",alertstate=\"firing\",alertname=~\"Transceiver.*\",instance=~\"$instance\",interface=~\"$interface\"}) or vector(0)",
+          "instant": true,
+          "legendFormat": "alerts",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Firing Prometheus Alerts",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "Live module temperature over time with warning and alarm thresholds.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 4,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 2,
+          "unit": "celsius"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 5
+      },
+      "id": 5,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "min",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "transceiver_temperature_celsius{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\"}",
+          "legendFormat": "{{instance}} {{interface}}",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "editorMode": "code",
+          "expr": "transceiver_diagnostic_threshold{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\",metric=\"temperature_celsius\",severity=\"warning\",boundary=\"high\"}",
+          "legendFormat": "Warn High {{instance}} {{interface}}",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "editorMode": "code",
+          "expr": "transceiver_diagnostic_threshold{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\",metric=\"temperature_celsius\",severity=\"alarm\",boundary=\"high\"}",
+          "legendFormat": "Alarm High {{instance}} {{interface}}",
+          "range": true,
+          "refId": "C"
+        },
+        {
+          "editorMode": "code",
+          "expr": "transceiver_diagnostic_threshold{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\",metric=\"temperature_celsius\",severity=\"warning\",boundary=\"low\"}",
+          "legendFormat": "Warn Low {{instance}} {{interface}}",
+          "range": true,
+          "refId": "D"
+        },
+        {
+          "editorMode": "code",
+          "expr": "transceiver_diagnostic_threshold{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\",metric=\"temperature_celsius\",severity=\"alarm\",boundary=\"low\"}",
+          "legendFormat": "Alarm Low {{instance}} {{interface}}",
+          "range": true,
+          "refId": "E"
+        }
+      ],
+      "title": "Module Temperature",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "Module supply voltage with warning and alarm thresholds.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 4,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 3,
+          "unit": "volt"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 5
+      },
+      "id": 6,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "min",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "transceiver_voltage_volts{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\"}",
+          "legendFormat": "{{instance}} {{interface}}",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "editorMode": "code",
+          "expr": "transceiver_diagnostic_threshold{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\",metric=\"voltage_volts\",severity=\"warning\",boundary=\"high\"}",
+          "legendFormat": "Warn High {{instance}} {{interface}}",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "editorMode": "code",
+          "expr": "transceiver_diagnostic_threshold{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\",metric=\"voltage_volts\",severity=\"alarm\",boundary=\"high\"}",
+          "legendFormat": "Alarm High {{instance}} {{interface}}",
+          "range": true,
+          "refId": "C"
+        },
+        {
+          "editorMode": "code",
+          "expr": "transceiver_diagnostic_threshold{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\",metric=\"voltage_volts\",severity=\"warning\",boundary=\"low\"}",
+          "legendFormat": "Warn Low {{instance}} {{interface}}",
+          "range": true,
+          "refId": "D"
+        },
+        {
+          "editorMode": "code",
+          "expr": "transceiver_diagnostic_threshold{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\",metric=\"voltage_volts\",severity=\"alarm\",boundary=\"low\"}",
+          "legendFormat": "Alarm Low {{instance}} {{interface}}",
+          "range": true,
+          "refId": "E"
+        }
+      ],
+      "title": "Module Voltage",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "Receive optical power in dBm with warning and alarm thresholds converted from milliwatts.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 4,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 2,
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 13
+      },
+      "id": 7,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "min",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "transceiver_rx_power_dbm{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\"}",
+          "legendFormat": "{{instance}} {{interface}} L{{lane}}",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "editorMode": "code",
+          "expr": "10 * log10(transceiver_diagnostic_threshold{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\",metric=\"rx_power_milliwatts\",severity=\"warning\",boundary=\"high\"})",
+          "legendFormat": "Warn High {{instance}} {{interface}} L{{lane}}",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "editorMode": "code",
+          "expr": "10 * log10(transceiver_diagnostic_threshold{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\",metric=\"rx_power_milliwatts\",severity=\"alarm\",boundary=\"high\"})",
+          "legendFormat": "Alarm High {{instance}} {{interface}} L{{lane}}",
+          "range": true,
+          "refId": "C"
+        },
+        {
+          "editorMode": "code",
+          "expr": "10 * log10(transceiver_diagnostic_threshold{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\",metric=\"rx_power_milliwatts\",severity=\"warning\",boundary=\"low\"})",
+          "legendFormat": "Warn Low {{instance}} {{interface}} L{{lane}}",
+          "range": true,
+          "refId": "D"
+        },
+        {
+          "editorMode": "code",
+          "expr": "10 * log10(transceiver_diagnostic_threshold{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\",metric=\"rx_power_milliwatts\",severity=\"alarm\",boundary=\"low\"})",
+          "legendFormat": "Alarm Low {{instance}} {{interface}} L{{lane}}",
+          "range": true,
+          "refId": "E"
+        }
+      ],
+      "title": "RX Optical Power (dBm)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "Transmit optical power in dBm with warning and alarm thresholds converted from milliwatts.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 4,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 2,
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 13
+      },
+      "id": 8,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "min",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "transceiver_tx_power_dbm{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\"}",
+          "legendFormat": "{{instance}} {{interface}} L{{lane}}",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "editorMode": "code",
+          "expr": "10 * log10(transceiver_diagnostic_threshold{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\",metric=\"tx_power_milliwatts\",severity=\"warning\",boundary=\"high\"})",
+          "legendFormat": "Warn High {{instance}} {{interface}} L{{lane}}",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "editorMode": "code",
+          "expr": "10 * log10(transceiver_diagnostic_threshold{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\",metric=\"tx_power_milliwatts\",severity=\"alarm\",boundary=\"high\"})",
+          "legendFormat": "Alarm High {{instance}} {{interface}} L{{lane}}",
+          "range": true,
+          "refId": "C"
+        },
+        {
+          "editorMode": "code",
+          "expr": "10 * log10(transceiver_diagnostic_threshold{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\",metric=\"tx_power_milliwatts\",severity=\"warning\",boundary=\"low\"})",
+          "legendFormat": "Warn Low {{instance}} {{interface}} L{{lane}}",
+          "range": true,
+          "refId": "D"
+        },
+        {
+          "editorMode": "code",
+          "expr": "10 * log10(transceiver_diagnostic_threshold{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\",metric=\"tx_power_milliwatts\",severity=\"alarm\",boundary=\"low\"})",
+          "legendFormat": "Alarm Low {{instance}} {{interface}} L{{lane}}",
+          "range": true,
+          "refId": "E"
+        }
+      ],
+      "title": "TX Optical Power (dBm)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "Transmit bias current with warning and alarm thresholds.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 4,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 2,
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 21
+      },
+      "id": 9,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "min",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "transceiver_tx_bias_milliamps{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\"}",
+          "legendFormat": "{{instance}} {{interface}} L{{lane}}",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "editorMode": "code",
+          "expr": "transceiver_diagnostic_threshold{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\",metric=\"tx_bias_milliamps\",severity=\"warning\",boundary=\"high\"}",
+          "legendFormat": "Warn High {{instance}} {{interface}} L{{lane}}",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "editorMode": "code",
+          "expr": "transceiver_diagnostic_threshold{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\",metric=\"tx_bias_milliamps\",severity=\"alarm\",boundary=\"high\"}",
+          "legendFormat": "Alarm High {{instance}} {{interface}} L{{lane}}",
+          "range": true,
+          "refId": "C"
+        },
+        {
+          "editorMode": "code",
+          "expr": "transceiver_diagnostic_threshold{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\",metric=\"tx_bias_milliamps\",severity=\"warning\",boundary=\"low\"}",
+          "legendFormat": "Warn Low {{instance}} {{interface}} L{{lane}}",
+          "range": true,
+          "refId": "D"
+        },
+        {
+          "editorMode": "code",
+          "expr": "transceiver_diagnostic_threshold{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\",metric=\"tx_bias_milliamps\",severity=\"alarm\",boundary=\"low\"}",
+          "legendFormat": "Alarm Low {{instance}} {{interface}} L{{lane}}",
+          "range": true,
+          "refId": "E"
+        }
+      ],
+      "title": "TX Bias Current (mA)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "Current active lane datapath state, if the module exposes lane state.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 21
+      },
+      "id": 10,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        },
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "transceiver_lane_datapath_state{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\"} == 1",
+          "format": "table",
+          "instant": true,
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Lane Datapath State",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Value": true,
+              "__name__": true,
+              "container": true,
+              "endpoint": true,
+              "job": true,
+              "namespace": true,
+              "pod": true
+            },
+            "renameByName": {
+              "format": "Format",
+              "instance": "Instance",
+              "interface": "Interface",
+              "lane": "Lane",
+              "state": "State"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "Instant receive optical power by lane.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-GrYlRd"
+          },
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": -10
+              },
+              {
+                "color": "green",
+                "value": -5
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 0,
+        "y": 29
+      },
+      "id": 11,
+      "options": {
+        "displayMode": "gradient",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true,
+        "text": {},
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "transceiver_rx_power_dbm{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\"}",
+          "instant": true,
+          "legendFormat": "Lane {{lane}}",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Current RX Power by Lane",
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "Instant transmit optical power by lane.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-GrYlRd"
+          },
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": -8
+              },
+              {
+                "color": "green",
+                "value": -3
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 8,
+        "y": 29
+      },
+      "id": 12,
+      "options": {
+        "displayMode": "gradient",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true,
+        "text": {},
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "transceiver_tx_power_dbm{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\"}",
+          "instant": true,
+          "legendFormat": "Lane {{lane}}",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Current TX Power by Lane",
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "Instant transmit bias current by lane.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-GrYlRd"
+          },
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 8
+              },
+              {
+                "color": "red",
+                "value": 15
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 16,
+        "y": 29
+      },
+      "id": 13,
+      "options": {
+        "displayMode": "gradient",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true,
+        "text": {},
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "transceiver_tx_bias_milliamps{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\"}",
+          "instant": true,
+          "legendFormat": "Lane {{lane}}",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Current TX Bias by Lane",
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "Optical module identity and static EEPROM inventory labels.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 36
+      },
+      "id": 14,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        },
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "transceiver_module_info{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\"}",
+          "format": "table",
+          "instant": true,
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Optical Module Inventory",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Value": true,
+              "__name__": true,
+              "container": true,
+              "endpoint": true,
+              "job": true,
+              "namespace": true,
+              "pod": true
+            },
+            "renameByName": {
+              "cable_kind": "Cable Kind",
+              "cable_standard": "Cable Standard",
+              "connector": "Connector",
+              "date_code": "Date Code",
+              "encoding": "Encoding",
+              "form_factor": "Form Factor",
+              "format": "Format",
+              "instance": "Instance",
+              "interface": "Interface",
+              "interface_technology": "Interface Technology",
+              "media_type": "Media Type",
+              "part_number": "Part Number",
+              "rate_identifier": "Rate Identifier",
+              "revision": "Revision",
+              "serial_number": "Serial Number",
+              "vendor": "Vendor",
+              "vendor_oui": "Vendor OUI"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "Supported link lengths by media type, when exposed by the optical module EEPROM.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "decimals": 0,
+          "unit": "lengthm"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 46
+      },
+      "id": 15,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        },
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "transceiver_link_length_meters{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\"}",
+          "format": "table",
+          "instant": true,
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Supported Link Lengths",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true,
+              "container": true,
+              "endpoint": true,
+              "job": true,
+              "namespace": true,
+              "pod": true
+            },
+            "renameByName": {
+              "Value": "Max Length (m)",
+              "format": "Format",
+              "instance": "Instance",
+              "interface": "Interface",
+              "medium": "Medium"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "Nominal signaling rate in megabaud for the selected module.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "decimals": 0,
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 46
+      },
+      "id": 16,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "transceiver_nominal_bitrate_mbd{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\"}",
+          "instant": true,
+          "legendFormat": "Mbd",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Nominal Bitrate (Mbd)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "Media wavelength in nanometers when exposed by the module.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "decimals": 2,
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 46
+      },
+      "id": 17,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "transceiver_wavelength_nanometers{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\"}",
+          "instant": true,
+          "legendFormat": "nm",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Wavelength (nm)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "Advertised module power class when exposed by the module.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "decimals": 0,
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 50
+      },
+      "id": 18,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "transceiver_module_power_class{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\"}",
+          "instant": true,
+          "legendFormat": "class",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Module Power Class",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "Advertised maximum module power in watts when exposed by the module.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "decimals": 2,
+          "unit": "watt"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 50
+      },
+      "id": 19,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "transceiver_module_power_max_watts{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\"}",
+          "instant": true,
+          "legendFormat": "watts",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Module Power Max (W)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "Raw EEPROM flags with lane datapath state. Deactivated lane flags are shown for context but are not counted as actionable flags.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 54
+      },
+      "id": 20,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        },
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "(label_replace(transceiver_alarm_status{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\",lane=\"\"} == 1, \"state\", \"module\", \"interface\", \".*\")) or ((transceiver_alarm_status{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\",lane!=\"\"} == 1) * on(cluster, job, instance, interface, format, lane) group_left(state) (transceiver_lane_datapath_state{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\"} == 1)) or (label_replace((transceiver_alarm_status{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\",lane!=\"\"} == 1) unless on(cluster, job, instance, interface, format, lane) transceiver_lane_datapath_state{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\"}, \"state\", \"unknown\", \"interface\", \".*\"))",
+          "format": "table",
+          "instant": true,
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "EEPROM Warning / Alarm / Fault Flags",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Value": true,
+              "__name__": true,
+              "container": true,
+              "endpoint": true,
+              "job": true,
+              "namespace": true,
+              "pod": true
+            },
+            "renameByName": {
+              "alarm": "Alarm",
+              "format": "Format",
+              "instance": "Instance",
+              "interface": "Interface",
+              "lane": "Lane",
+              "severity": "Severity",
+              "state": "Lane State"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "Current firing Prometheus alerts related to the transceiver exporter.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 54
+      },
+      "id": 21,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        },
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "ALERTS{job=\"transceiver-exporter\",alertstate=\"firing\",alertname=~\"Transceiver.*\",instance=~\"$instance\",interface=~\"$interface\"}",
+          "format": "table",
+          "instant": true,
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Firing Prometheus Alerts",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Value": true,
+              "__name__": true
+            },
+            "renameByName": {
+              "alertname": "Alert",
+              "alertstate": "State",
+              "format": "Format",
+              "instance": "Instance",
+              "interface": "Interface",
+              "lane": "Lane",
+              "part_number": "Part Number",
+              "serial_number": "Serial Number",
+              "severity": "Severity",
+              "vendor": "Vendor"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    }
+  ],
+  "refresh": "1m",
+  "schemaVersion": 39,
+  "style": "dark",
+  "tags": [
+    "network",
+    "optics",
+    "prometheus",
+    "transceiver"
+  ],
+  "templating": {
+    "list": [
+      {
+        "allValue": ".*",
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(transceiver_scrape_success{job=\"transceiver-exporter\"}, instance)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Instance",
+        "multi": false,
+        "name": "instance",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(transceiver_scrape_success{job=\"transceiver-exporter\"}, instance)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(transceiver_scrape_success{job=\"transceiver-exporter\",instance=~\"$instance\"}, interface)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Interface",
+        "multi": false,
+        "name": "interface",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(transceiver_scrape_success{job=\"transceiver-exporter\",instance=~\"$instance\"}, interface)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timezone": "",
+  "title": "Transceiver Exporter / Optical Monitoring",
+  "uid": "transceiver-exporter-optics",
+  "version": 3,
+  "weekStart": ""
+}

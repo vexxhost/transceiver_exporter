@@ -60,8 +60,19 @@ func (c *netlinkClient) Close() error {
 	return c.conn.Close()
 }
 
+func (c *netlinkClient) ModuleIdentifier(interfaceName string) (uint8, error) {
+	data, err := c.read(interfaceName, 0, 0x00, 0, 1)
+	if err != nil {
+		return 0, err
+	}
+	if len(data) == 0 {
+		return 0, fmt.Errorf("ethtool netlink module eeprom reply missing identifier")
+	}
+	return data[0], nil
+}
+
 func (c *netlinkClient) ModuleEEPROM(interfaceName string) ([]byte, error) {
-	lower, err := c.readPage(interfaceName, 0, 0x00, 0)
+	lower, err := c.read(interfaceName, 0, 0x00, 0, modulePageSize)
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +80,7 @@ func (c *netlinkClient) ModuleEEPROM(interfaceName string) ([]byte, error) {
 	data := make([]byte, cmisPage00UpperOffset+modulePageSize)
 	copy(data, lower)
 
-	page00, err := c.readPage(interfaceName, 0, 0x00, modulePageSize)
+	page00, err := c.read(interfaceName, 0, 0x00, modulePageSize, modulePageSize)
 	if err != nil {
 		return data, nil
 	}
@@ -79,19 +90,19 @@ func (c *netlinkClient) ModuleEEPROM(interfaceName string) ([]byte, error) {
 		return data, nil
 	}
 
-	page01, err := c.readPage(interfaceName, 0, 0x01, modulePageSize)
+	page01, err := c.read(interfaceName, 0, 0x01, modulePageSize, modulePageSize)
 	if err != nil {
 		return data, nil
 	}
 	data = appendPage(data, cmisPage01Offset, page01)
 
-	page02, err := c.readPage(interfaceName, 0, 0x02, modulePageSize)
+	page02, err := c.read(interfaceName, 0, 0x02, modulePageSize, modulePageSize)
 	if err == nil {
 		data = appendPage(data, cmisPage02Offset, page02)
 	}
 
 	for bank := 0; bank < cmisNumBanks(page01); bank++ {
-		page11, err := c.readPage(interfaceName, uint8(bank), 0x11, modulePageSize)
+		page11, err := c.read(interfaceName, uint8(bank), 0x11, modulePageSize, modulePageSize)
 		if err != nil {
 			continue
 		}
@@ -101,14 +112,14 @@ func (c *netlinkClient) ModuleEEPROM(interfaceName string) ([]byte, error) {
 	return data, nil
 }
 
-func (c *netlinkClient) readPage(interfaceName string, bank, page uint8, offset uint32) ([]byte, error) {
+func (c *netlinkClient) read(interfaceName string, bank, page uint8, offset, length uint32) ([]byte, error) {
 	ae := netlink.NewAttributeEncoder()
 	ae.Nested(ethtoolModuleEEPROMHeader, func(nae *netlink.AttributeEncoder) error {
 		nae.String(unix.ETHTOOL_A_HEADER_DEV_NAME, interfaceName)
 		return nil
 	})
 	ae.Uint32(ethtoolModuleEEPROMOffset, offset)
-	ae.Uint32(ethtoolModuleEEPROMLength, modulePageSize)
+	ae.Uint32(ethtoolModuleEEPROMLength, length)
 	ae.Uint8(ethtoolModuleEEPROMPage, page)
 	ae.Uint8(ethtoolModuleEEPROMBank, bank)
 	ae.Uint8(ethtoolModuleEEPROMI2CAddress, moduleI2CAddressA0)

@@ -8,6 +8,7 @@ rendered_chart_json="$(mktemp)"
 trap 'rm -f "$rendered_chart" "$rendered_mixin_json" "$rendered_chart_json"' EXIT
 
 "$repo_root/hack/render-alerts.sh" --check
+"$repo_root/hack/render-dashboards.sh" --check
 promtool check rules "$repo_root/mixin/prometheus_alerts.yaml"
 promtool test rules "$repo_root/mixin/tests.yml"
 
