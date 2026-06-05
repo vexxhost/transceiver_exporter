@@ -38,6 +38,9 @@ jobs:
       - name: Run workflow lint
         run: nix develop --command actionlint
 
+      - name: Test chart release branch preflight
+        run: ./hack/test-chart-pages-branch.sh
+
       - name: Check GoReleaser config
         run: nix develop --command goreleaser check
 
