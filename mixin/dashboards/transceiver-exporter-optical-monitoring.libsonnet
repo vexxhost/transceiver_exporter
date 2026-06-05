@@ -8,8 +8,36 @@
   local selector(extra=[]) = '{%s}' % labelSet(extra),
   local scopedSelector(extra=[]) = selector(['instance=~"$instance"', 'interface=~"$interface"'] + extra),
   local instanceSelector(extra=[]) = selector(['instance=~"$instance"'] + extra),
-  local alertSelector = '{alertstate="firing",alertname=~"Transceiver.*",instance=~"$instance"}',
+  local alertSelector = selector([
+    'alertstate="firing"',
+    'alertname=~"Transceiver.*"',
+    'instance=~"$instance"',
+    'interface=~"$interface"',
+  ]),
   local metric(name, extra=[]) = '%s%s' % [name, scopedSelector(extra)],
+  local activeAlarmExpr =
+    '((%s == 1) or ((%s == 1) and on(cluster, job, instance, interface, format, lane) (%s == 1)))' %
+    [
+      metric('transceiver_alarm_status', ['lane=""']),
+      metric('transceiver_alarm_status', ['lane!=""']),
+      metric('transceiver_lane_datapath_state', ['state="activated"']),
+    ],
+  local moduleAlarmWithStateExpr =
+    'label_replace(%s == 1, "state", "module", "interface", ".*")' %
+    metric('transceiver_alarm_status', ['lane=""']),
+  local laneAlarmWithStateExpr =
+    '(%s == 1) * on(cluster, job, instance, interface, format, lane) group_left(state) (%s == 1)' %
+    [
+      metric('transceiver_alarm_status', ['lane!=""']),
+      metric('transceiver_lane_datapath_state'),
+    ],
+  local laneAlarmWithoutStateExpr =
+    'label_replace((%s == 1) unless on(cluster, job, instance, interface, format, lane) %s, "state", "unknown", "interface", ".*")' %
+    [
+      metric('transceiver_alarm_status', ['lane!=""']),
+      metric('transceiver_lane_datapath_state'),
+    ],
+  local alarmWithStateExpr = '(%s) or (%s) or (%s)' % [moduleAlarmWithStateExpr, laneAlarmWithStateExpr, laneAlarmWithoutStateExpr],
   local threshold(metricName, severity, boundary) =
     metric('transceiver_diagnostic_threshold', [
       'metric="%s"' % metricName,
@@ -420,10 +448,10 @@
       ),
       statPanel(
         3,
-        'Active EEPROM Flags',
-        'Active raw EEPROM warning, alarm, or fault flags for the selected interface.',
+        'Actionable EEPROM Flags',
+        'Module-level flags and lane-scoped flags on activated lanes. Deactivated lane flags are listed below as deactivated.',
         grid(5, 6, 12, 0),
-        'sum(%s == 1) or vector(0)' % metric('transceiver_alarm_status'),
+        'sum(%s) or vector(0)' % activeAlarmExpr,
         'flags',
         {
           color: {
@@ -631,10 +659,10 @@
       ),
       tablePanel(
         20,
-        'Active EEPROM Warning / Alarm / Fault Flags',
-        'Raw EEPROM flags that are currently active for the selected interface.',
+        'EEPROM Warning / Alarm / Fault Flags',
+        'Raw EEPROM flags with lane datapath state. Deactivated lane flags are shown for context but are not counted as actionable flags.',
         grid(8, 12, 0, 54),
-        '%s == 1' % metric('transceiver_alarm_status'),
+        alarmWithStateExpr,
         {
           alarm: 'Alarm',
           format: 'Format',
@@ -642,6 +670,7 @@
           interface: 'Interface',
           lane: 'Lane',
           severity: 'Severity',
+          state: 'Lane State',
         },
       ),
       tablePanel(

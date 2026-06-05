@@ -219,7 +219,7 @@
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
       },
-      "description": "Active raw EEPROM warning, alarm, or fault flags for the selected interface.",
+      "description": "Module-level flags and lane-scoped flags on activated lanes. Deactivated lane flags are listed below as deactivated.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -270,14 +270,14 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum(transceiver_alarm_status{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\"} == 1) or vector(0)",
+          "expr": "sum(((transceiver_alarm_status{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\",lane=\"\"} == 1) or ((transceiver_alarm_status{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\",lane!=\"\"} == 1) and on(cluster, job, instance, interface, format, lane) (transceiver_lane_datapath_state{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\",state=\"activated\"} == 1)))) or vector(0)",
           "instant": true,
           "legendFormat": "flags",
           "range": false,
           "refId": "A"
         }
       ],
-      "title": "Active EEPROM Flags",
+      "title": "Actionable EEPROM Flags",
       "type": "stat"
     },
     {
@@ -336,7 +336,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "count(ALERTS{alertstate=\"firing\",alertname=~\"Transceiver.*\",instance=~\"$instance\"}) or vector(0)",
+          "expr": "count(ALERTS{job=\"transceiver-exporter\",alertstate=\"firing\",alertname=~\"Transceiver.*\",instance=~\"$instance\",interface=~\"$interface\"}) or vector(0)",
           "instant": true,
           "legendFormat": "alerts",
           "range": false,
@@ -1517,7 +1517,7 @@
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
       },
-      "description": "Raw EEPROM flags that are currently active for the selected interface.",
+      "description": "Raw EEPROM flags with lane datapath state. Deactivated lane flags are shown for context but are not counted as actionable flags.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -1547,14 +1547,14 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "transceiver_alarm_status{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\"} == 1",
+          "expr": "(label_replace(transceiver_alarm_status{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\",lane=\"\"} == 1, \"state\", \"module\", \"interface\", \".*\")) or ((transceiver_alarm_status{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\",lane!=\"\"} == 1) * on(cluster, job, instance, interface, format, lane) group_left(state) (transceiver_lane_datapath_state{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\"} == 1)) or (label_replace((transceiver_alarm_status{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\",lane!=\"\"} == 1) unless on(cluster, job, instance, interface, format, lane) transceiver_lane_datapath_state{job=\"transceiver-exporter\",instance=~\"$instance\",interface=~\"$interface\"}, \"state\", \"unknown\", \"interface\", \".*\"))",
           "format": "table",
           "instant": true,
           "range": false,
           "refId": "A"
         }
       ],
-      "title": "Active EEPROM Warning / Alarm / Fault Flags",
+      "title": "EEPROM Warning / Alarm / Fault Flags",
       "transformations": [
         {
           "id": "organize",
@@ -1575,7 +1575,8 @@
               "instance": "Instance",
               "interface": "Interface",
               "lane": "Lane",
-              "severity": "Severity"
+              "severity": "Severity",
+              "state": "Lane State"
             }
           }
         }
@@ -1617,7 +1618,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "ALERTS{alertstate=\"firing\",alertname=~\"Transceiver.*\",instance=~\"$instance\"}",
+          "expr": "ALERTS{job=\"transceiver-exporter\",alertstate=\"firing\",alertname=~\"Transceiver.*\",instance=~\"$instance\",interface=~\"$interface\"}",
           "format": "table",
           "instant": true,
           "range": false,
