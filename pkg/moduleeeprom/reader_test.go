@@ -8,6 +8,7 @@ import (
 
 func TestReaderModuleEEPROMFallbacks(t *testing.T) {
 	ioctlErr := errors.New("ioctl failed")
+	netlinkProbeErr := errors.New("netlink probe failed")
 	netlinkErr := errors.New("netlink failed")
 
 	tests := []struct {
@@ -20,19 +21,19 @@ func TestReaderModuleEEPROMFallbacks(t *testing.T) {
 		{
 			name:     "ioctl success non-cmis",
 			ioctl:    &fakeIOCTL{data: []byte{0x03}},
-			netlink:  &fakeNetlink{data: []byte{0x18}},
+			netlink:  &fakeNetlink{identifier: 0x03, data: []byte{0x18}},
 			expected: []byte{0x03},
 		},
 		{
-			name:     "cmis prefers netlink pages",
+			name:     "cmis prefers netlink pages before ioctl",
 			ioctl:    &fakeIOCTL{data: []byte{0x18}},
-			netlink:  &fakeNetlink{data: []byte{0x18, 0x01}},
+			netlink:  &fakeNetlink{identifier: 0x1e, data: []byte{0x18, 0x01}},
 			expected: []byte{0x18, 0x01},
 		},
 		{
 			name:     "cmis falls back to ioctl when netlink fails",
 			ioctl:    &fakeIOCTL{data: []byte{0x18}},
-			netlink:  &fakeNetlink{err: netlinkErr},
+			netlink:  &fakeNetlink{identifier: 0x1e, err: netlinkErr},
 			expected: []byte{0x18},
 		},
 		{
@@ -43,14 +44,20 @@ func TestReaderModuleEEPROMFallbacks(t *testing.T) {
 		{
 			name:     "ioctl error falls back to netlink",
 			ioctl:    &fakeIOCTL{err: ioctlErr},
-			netlink:  &fakeNetlink{data: []byte{0x18}},
+			netlink:  &fakeNetlink{identifier: 0x03, data: []byte{0x18}},
 			expected: []byte{0x18},
 		},
 		{
 			name:          "ioctl and netlink errors are joined",
 			ioctl:         &fakeIOCTL{err: ioctlErr},
-			netlink:       &fakeNetlink{err: netlinkErr},
+			netlink:       &fakeNetlink{identifier: 0x03, err: netlinkErr},
 			expectedError: netlinkErr,
+		},
+		{
+			name:     "cmis after ioctl still prefers netlink when probe fails",
+			ioctl:    &fakeIOCTL{data: []byte{0x1e}},
+			netlink:  &fakeNetlink{identifierErr: netlinkProbeErr, data: []byte{0x1e, 0x01}},
+			expected: []byte{0x1e, 0x01},
 		},
 	}
 
@@ -73,6 +80,29 @@ func TestReaderModuleEEPROMFallbacks(t *testing.T) {
 			}
 			if !bytes.Equal(got, tt.expected) {
 				t.Fatalf("data = %x, want %x", got, tt.expected)
+			}
+
+			switch tt.name {
+			case "cmis prefers netlink pages before ioctl":
+				if tt.ioctl.calls != 0 {
+					t.Fatalf("ioctl calls = %d, want 0", tt.ioctl.calls)
+				}
+				if tt.netlink.identifierCalls != 1 {
+					t.Fatalf("netlink identifier calls = %d, want 1", tt.netlink.identifierCalls)
+				}
+				if tt.netlink.eepromCalls != 1 {
+					t.Fatalf("netlink EEPROM calls = %d, want 1", tt.netlink.eepromCalls)
+				}
+			case "ioctl success non-cmis":
+				if tt.ioctl.calls != 1 {
+					t.Fatalf("ioctl calls = %d, want 1", tt.ioctl.calls)
+				}
+				if tt.netlink.identifierCalls != 1 {
+					t.Fatalf("netlink identifier calls = %d, want 1", tt.netlink.identifierCalls)
+				}
+				if tt.netlink.eepromCalls != 0 {
+					t.Fatalf("netlink EEPROM calls = %d, want 0", tt.netlink.eepromCalls)
+				}
 			}
 		})
 	}
@@ -143,9 +173,11 @@ type fakeIOCTL struct {
 	data   []byte
 	err    error
 	closed bool
+	calls  int
 }
 
 func (f *fakeIOCTL) ModuleEeprom(string) ([]byte, error) {
+	f.calls++
 	if f.err != nil {
 		return nil, f.err
 	}
@@ -157,13 +189,26 @@ func (f *fakeIOCTL) Close() {
 }
 
 type fakeNetlink struct {
-	data     []byte
-	err      error
-	closeErr error
-	closed   bool
+	identifier      uint8
+	identifierErr   error
+	identifierCalls int
+	data            []byte
+	err             error
+	eepromCalls     int
+	closeErr        error
+	closed          bool
+}
+
+func (f *fakeNetlink) ModuleIdentifier(string) (uint8, error) {
+	f.identifierCalls++
+	if f.identifierErr != nil {
+		return 0, f.identifierErr
+	}
+	return f.identifier, nil
 }
 
 func (f *fakeNetlink) ModuleEEPROM(string) ([]byte, error) {
+	f.eepromCalls++
 	if f.err != nil {
 		return nil, f.err
 	}
