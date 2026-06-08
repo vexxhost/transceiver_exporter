@@ -9,6 +9,10 @@ module temperature, voltage, TX bias, TX optical power, RX optical power,
 diagnostic thresholds, module/lane state, static inventory, and alarm/warning
 status.
 
+When no `--interface` flags are set, the exporter auto-discovers physical
+non-loopback interfaces and skips auto-discovered ports that do not currently
+expose module EEPROM data.
+
 ## Binaries
 
 - `transceiver_exporter`: HTTP exporter, defaulting to `:9459` and `/metrics`.

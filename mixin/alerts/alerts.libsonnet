@@ -45,8 +45,8 @@
               severity: 'warning',
             },
             annotations: {
-              summary: 'Transceiver EEPROM scrape failed.',
-              description: 'transceiver_exporter is reachable, but it has not been able to read or decode EEPROM data for {{ $labels.instance }} interface {{ $labels.interface }} for 15 minutes.',
+              summary: 'Transceiver interface scrape failed.',
+              description: 'transceiver_exporter is reachable, but it has not been able to read or decode EEPROM data for the selected interface {{ $labels.interface }} on {{ $labels.instance }} for 15 minutes.',
               runbook_url: cfg.runbookURLPattern % 'transceiverscrapefailed',
             },
           },
