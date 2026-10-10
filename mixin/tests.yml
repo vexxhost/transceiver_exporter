@@ -39,8 +39,8 @@ tests:
               job: transceiver-exporter
               severity: warning
             exp_annotations:
-              summary: Transceiver EEPROM scrape failed.
-              description: transceiver_exporter is reachable, but it has not been able to read or decode EEPROM data for node1:9459 interface eth0 for 15 minutes.
+              summary: Transceiver interface scrape failed.
+              description: transceiver_exporter is reachable, but it has not been able to read or decode EEPROM data for the selected interface eth0 on node1:9459 for 15 minutes.
               runbook_url: https://github.com/vexxhost/transceiver_exporter/tree/main/mixin/runbook.md#alert-name-transceiverscrapefailed
 
   - interval: 1m

@@ -15,8 +15,11 @@ direct hardware failure signal.
 
 ## Alert Name: TransceiverScrapeFailed
 
-The exporter found an interface to scrape but could not read or decode its
-module EEPROM. Check whether the interface still has a module installed,
+The exporter found a selected interface to scrape but could not read or decode
+its module EEPROM. Auto-discovery first probes module information and skips
+interfaces whose module-info query reports no plugged module, so this alert
+points to an explicit interface or a present module that is still expected to
+expose EEPROM data. Check whether the interface still has a module installed,
 whether the NIC driver supports module EEPROM reads, and whether the exporter
 has enough privileges to use the ethtool API.
 

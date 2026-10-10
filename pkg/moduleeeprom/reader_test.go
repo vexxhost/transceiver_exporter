@@ -123,6 +123,50 @@ func TestReaderCloseClosesBothClients(t *testing.T) {
 	}
 }
 
+func TestReaderCloseClosesPresenceProbe(t *testing.T) {
+	presence := &fakePresenceProbe{}
+
+	if err := newReaderWithPresence(&fakeIOCTL{}, &fakeNetlink{}, presence).Close(); err != nil {
+		t.Fatalf("close reader: %v", err)
+	}
+	if !presence.closed {
+		t.Fatal("presence probe was not closed")
+	}
+}
+
+func TestReaderModuleEEPROMReturnsErrModuleAbsentBeforeRead(t *testing.T) {
+	ioctl := &fakeIOCTL{data: []byte{0x03}}
+	netlink := &fakeNetlink{identifier: 0x03, data: []byte{0x18}}
+	reader := newReaderWithPresence(ioctl, netlink, &fakePresenceProbe{present: false})
+
+	_, err := reader.ModuleEEPROM("eth0")
+	if !errors.Is(err, ErrModuleAbsent) {
+		t.Fatalf("module eeprom error = %v, want ErrModuleAbsent", err)
+	}
+	if ioctl.calls != 0 {
+		t.Fatalf("ioctl calls = %d, want 0", ioctl.calls)
+	}
+	if netlink.identifierCalls != 0 {
+		t.Fatalf("netlink identifier calls = %d, want 0", netlink.identifierCalls)
+	}
+}
+
+func TestReaderModuleEEPROMContinuesWhenPresenceProbeErrors(t *testing.T) {
+	reader := newReaderWithPresence(
+		&fakeIOCTL{data: []byte{0x03}},
+		nil,
+		&fakePresenceProbe{err: errors.New("probe failed")},
+	)
+
+	got, err := reader.ModuleEEPROM("eth0")
+	if err != nil {
+		t.Fatalf("module eeprom: %v", err)
+	}
+	if !bytes.Equal(got, []byte{0x03}) {
+		t.Fatalf("data = %x, want 03", got)
+	}
+}
+
 func TestReaderCloseReturnsNetlinkError(t *testing.T) {
 	closeErr := errors.New("close failed")
 	reader := newReader(&fakeIOCTL{}, &fakeNetlink{closeErr: closeErr})
@@ -199,6 +243,13 @@ type fakeNetlink struct {
 	closed          bool
 }
 
+type fakePresenceProbe struct {
+	present  bool
+	err      error
+	closeErr error
+	closed   bool
+}
+
 func (f *fakeNetlink) ModuleIdentifier(string) (uint8, error) {
 	f.identifierCalls++
 	if f.identifierErr != nil {
@@ -216,6 +267,18 @@ func (f *fakeNetlink) ModuleEEPROM(string) ([]byte, error) {
 }
 
 func (f *fakeNetlink) Close() error {
+	f.closed = true
+	return f.closeErr
+}
+
+func (f *fakePresenceProbe) ModulePresent(string) (bool, error) {
+	if f.err != nil {
+		return false, f.err
+	}
+	return f.present, nil
+}
+
+func (f *fakePresenceProbe) Close() error {
 	f.closed = true
 	return f.closeErr
 }

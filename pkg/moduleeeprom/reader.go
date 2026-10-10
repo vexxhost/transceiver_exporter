@@ -20,15 +20,25 @@ type netlinkModuleReader interface {
 	Close() error
 }
 
+type modulePresenceProber interface {
+	ModulePresent(interfaceName string) (bool, error)
+	Close() error
+}
+
+// ErrModuleAbsent reports that the interface currently has no plugged
+// transceiver module to read.
+var ErrModuleAbsent = errors.New("moduleeeprom: module absent")
+
 // Reader reads module EEPROM data for network interfaces.
 //
 // Reader is safe for concurrent use. It serializes access to the underlying
 // ethtool clients because the ioctl client keeps process-level file descriptor
 // state and module EEPROM reads can require multi-page netlink fallback.
 type Reader struct {
-	mu      sync.Mutex
-	ioctl   ioctlClient
-	netlink netlinkModuleReader
+	mu       sync.Mutex
+	ioctl    ioctlClient
+	netlink  netlinkModuleReader
+	presence modulePresenceProber
 }
 
 // New opens an ethtool-backed Reader.
@@ -46,14 +56,19 @@ func New() (*Reader, error) {
 	}
 
 	netlink, _ := newNetlinkClient()
-	return newReader(ioctl, netlink), nil
+	presence, _ := newModulePresenceProbe()
+	return newReaderWithPresence(ioctl, netlink, presence), nil
 }
 
 func newReader(ioctl ioctlClient, netlink netlinkModuleReader) *Reader {
+	return newReaderWithPresence(ioctl, netlink, nil)
+}
+
+func newReaderWithPresence(ioctl ioctlClient, netlink netlinkModuleReader, presence modulePresenceProber) *Reader {
 	if isNilNetlinkReader(netlink) {
 		netlink = nil
 	}
-	return &Reader{ioctl: ioctl, netlink: netlink}
+	return &Reader{ioctl: ioctl, netlink: netlink, presence: presence}
 }
 
 func isNilNetlinkReader(reader netlinkModuleReader) bool {
@@ -74,6 +89,12 @@ func (r *Reader) Close() error {
 	if r.netlink != nil {
 		err = r.netlink.Close()
 	}
+	if r.presence != nil {
+		closeErr := r.presence.Close()
+		if err == nil {
+			err = closeErr
+		}
+	}
 	if r.ioctl != nil {
 		r.ioctl.Close()
 	}
@@ -88,6 +109,13 @@ func (r *Reader) Close() error {
 func (r *Reader) ModuleEEPROM(interfaceName string) ([]byte, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
+
+	if r.presence != nil {
+		present, err := r.presence.ModulePresent(interfaceName)
+		if err == nil && !present {
+			return nil, ErrModuleAbsent
+		}
+	}
 
 	var (
 		netlinkData  []byte

@@ -1,12 +1,14 @@
 package collector
 
 import (
+	"errors"
 	"log/slog"
 	"math"
 	"strconv"
 
 	"github.com/prometheus/client_golang/prometheus"
 
+	"github.com/vexxhost/transceiver_exporter/pkg/moduleeeprom"
 	"github.com/vexxhost/transceiver_exporter/pkg/netdev"
 	"github.com/vexxhost/transceiver_exporter/pkg/sff"
 	"github.com/vexxhost/transceiver_exporter/pkg/transceiver"
@@ -23,6 +25,7 @@ type transceiverCollector struct {
 	reader     Reader
 	decoder    decoder
 	interfaces []string
+	discoverer func() ([]string, error)
 	logger     *slog.Logger
 
 	scrapeSuccess       *prometheus.Desc
@@ -52,8 +55,8 @@ type transceiverCollector struct {
 //
 // If interfaces is empty, the collector discovers physical non-loopback
 // interfaces on each scrape and ignores devices that do not support module
-// EEPROM access. If interfaces is non-empty, scrape errors are logged for those
-// explicit interfaces.
+// EEPROM access or do not currently expose a transceiver module. If interfaces
+// is non-empty, scrape errors are logged for those explicit interfaces.
 func NewTransceiverCollector(reader Reader, interfaces []string, logger *slog.Logger) prometheus.Collector {
 	return newTransceiverCollector(reader, sff.Decode, interfaces, logger)
 }
@@ -89,6 +92,7 @@ func newTransceiverCollector(reader Reader, decoder decoder, interfaces []string
 		reader:     reader,
 		decoder:    decoder,
 		interfaces: interfaces,
+		discoverer: netdev.CandidateNames,
 		logger:     logger,
 		scrapeSuccess: prometheus.NewDesc(
 			"transceiver_scrape_success",
@@ -240,7 +244,7 @@ func (c *transceiverCollector) Collect(ch chan<- prometheus.Metric) {
 	interfaces := c.interfaces
 	autoDiscovered := len(interfaces) == 0
 	if len(interfaces) == 0 {
-		discovered, err := netdev.CandidateNames()
+		discovered, err := c.discoverer()
 		if err != nil {
 			c.warn("discover interfaces failed", "err", err)
 			return
@@ -251,7 +255,7 @@ func (c *transceiverCollector) Collect(ch chan<- prometheus.Metric) {
 	for _, interfaceName := range interfaces {
 		data, err := c.reader.ModuleEEPROM(interfaceName)
 		if err != nil {
-			if autoDiscovered && netdev.IsUnsupportedModuleError(err) {
+			if autoDiscovered && (errors.Is(err, moduleeeprom.ErrModuleAbsent) || netdev.IsUnsupportedModuleError(err)) {
 				continue
 			}
 			c.warn("read module eeprom failed", "interface", interfaceName, "err", err)
