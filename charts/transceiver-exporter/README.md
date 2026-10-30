@@ -54,8 +54,8 @@ The alert payload is generated from `mixin/alerts.jsonnet` into
 
 ## Interface Selection
 
-By default, the exporter discovers physical non-loopback interfaces. To restrict
-collection, set `interfaces`; each value renders as its own repeated
+By default, the exporter discovers physical non-loopback interfaces. To
+restrict collection, set `interfaces`; each value renders as its own repeated
 `--interface` flag.
 
 ```yaml

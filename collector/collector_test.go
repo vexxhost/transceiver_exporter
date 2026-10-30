@@ -8,6 +8,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/testutil"
 
+	"github.com/vexxhost/transceiver_exporter/pkg/moduleeeprom"
 	"github.com/vexxhost/transceiver_exporter/pkg/transceiver"
 )
 
@@ -106,6 +107,55 @@ func TestCollectorSkipsReaderAndDecoderErrors(t *testing.T) {
 				t.Fatalf("transceiver_scrape_success metric count = %d, want 1", got)
 			}
 		})
+	}
+}
+
+func TestCollectorAutoDiscoverySkipsAbsentModules(t *testing.T) {
+	c := newTransceiverCollector(
+		fakeReader{errs: map[string]error{"eth0": moduleeeprom.ErrModuleAbsent}},
+		fakeDecoder,
+		nil,
+		nil,
+	)
+	c.discoverer = func() ([]string, error) { return []string{"eth0"}, nil }
+
+	if got := testutil.CollectAndCount(c, "transceiver_scrape_success"); got != 0 {
+		t.Fatalf("transceiver_scrape_success metric count = %d, want 0", got)
+	}
+	if got := testutil.CollectAndCount(c, "transceiver_module_info"); got != 0 {
+		t.Fatalf("transceiver_module_info metric count = %d, want 0", got)
+	}
+}
+
+func TestCollectorAutoDiscoveryReportsPresentModuleReadErrors(t *testing.T) {
+	c := newTransceiverCollector(
+		fakeReader{
+			errs: map[string]error{"eth0": errors.New("read failed")},
+		},
+		fakeDecoder,
+		nil,
+		nil,
+	)
+	c.discoverer = func() ([]string, error) { return []string{"eth0"}, nil }
+
+	if got := testutil.CollectAndCount(c, "transceiver_scrape_success"); got != 1 {
+		t.Fatalf("transceiver_scrape_success metric count = %d, want 1", got)
+	}
+}
+
+func TestCollectorExplicitInterfacesReportAbsentModules(t *testing.T) {
+	c := newTransceiverCollector(
+		fakeReader{errs: map[string]error{"eth0": moduleeeprom.ErrModuleAbsent}},
+		fakeDecoder,
+		[]string{"eth0"},
+		nil,
+	)
+
+	if got := testutil.CollectAndCount(c, "transceiver_scrape_success"); got != 1 {
+		t.Fatalf("transceiver_scrape_success metric count = %d, want 1", got)
+	}
+	if got := testutil.CollectAndCount(c, "transceiver_module_info"); got != 0 {
+		t.Fatalf("transceiver_module_info metric count = %d, want 0", got)
 	}
 }
 
